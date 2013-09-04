@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="http://www.activiti.org/bpmn2.0">
+
+    <!--
+      "Eternal" process:
+      o start, wait minute, "poll" (print) uri, goto wait.
+
+      Should actually poll uri, count failures DO somekinf of alert if failure count >= 3 or somesuch action.
+    -->
+
+    <process id="pollUrlFailOnThree">
+
+        <startEvent id="theStart" />
+
+        <sequenceFlow id="flow1" sourceRef="theStart" targetRef="timerOneMinute" />
+
+        <intermediateCatchEvent id="timerOneMinute" >
+            <timerEventDefinition>
+                <timeDuration>PT1M</timeDuration>
+            </timerEventDefinition>
+        </intermediateCatchEvent>
+
+        <sequenceFlow id="flow2" sourceRef="timerOneMinute" targetRef="pollUri" />
+
+        <scriptTask id="pollUri" name="Poll URI" scriptFormat="groovy" activiti:autoStoreVariables="true">
+            <script>
+                count++;
+                System.out.println("*** taskId = " + taskId + ", uri = " + uri + ", count = " + count);
+            </script>
+        </scriptTask>
+
+        <sequenceFlow id="flow3" sourceRef="pollUri" targetRef="timerOneMinute" />
+
+        <!-- NOT REACHED -->
+        <endEvent id="theEnd" />
+
+    </process>
+
+</definitions>
+
+
